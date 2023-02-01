@@ -21,8 +21,8 @@ namespace Netcode.Transports.MultipeerConnectivity.Editor
                 // For MPC
                 rootDict.SetString("NSLocalNetworkUsageDescription", "For connecting to nearby devices");
                 PlistElementArray array = rootDict.CreateArray("NSBonjourServices");
-                array.AddString("_holokit-0904._tcp");
-                array.AddString("_holokit-0904._udp");
+                array.AddString("_netcode-mpc._tcp");
+                array.AddString("_netcode-mpc._udp");
 
                 File.WriteAllText(plistPath, plist.WriteToString());
             }

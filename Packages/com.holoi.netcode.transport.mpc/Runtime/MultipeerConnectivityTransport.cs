@@ -23,7 +23,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// </summary>
         public bool AutomaticBrowsing = true;
 
-        public static string BundleId = null;
+        public string SessionId = null;
 
         private static MultipeerConnectivityTransport s_instance;
 
@@ -41,10 +41,10 @@ namespace Netcode.Transports.MultipeerConnectivity
                                                   Action<int, IntPtr, int> OnReceivedData);
 
         [DllImport("__Internal")]
-        private static extern void MPC_StartAdvertising(string bundleId);
+        private static extern void MPC_StartAdvertising(string sessionId);
 
         [DllImport("__Internal")]
-        private static extern void MPC_StartBrowsing(string bundleId);
+        private static extern void MPC_StartBrowsing(string sessionId);
 
         [DllImport("__Internal")]
         private static extern void MPC_StopAdvertising();
@@ -117,7 +117,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         }
 
         [AOT.MonoPInvokeCallback(typeof(Action<int, IntPtr, int>))]
-        private static void OnReceivedData(int transportID, IntPtr dataPtr, int length)
+        private static void OnReceivedDataDelegate(int transportID, IntPtr dataPtr, int length)
         {
             if (s_instance != null)
             {
@@ -142,12 +142,14 @@ namespace Netcode.Transports.MultipeerConnectivity
 
         private void Awake()
         {
-            s_instance = this;
-        }
-
-        private void OnDestroy()
-        {
-            s_instance = null;
+            if (s_instance != null && s_instance != this)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                s_instance = this;
+            }
         }
 
         public override void Initialize(NetworkManager networkManager)
@@ -158,55 +160,55 @@ namespace Netcode.Transports.MultipeerConnectivity
                            OnConnectingWithPeerDelegate,
                            OnConnectedWithPeerDelegate,
                            OnDisconnectedWithPeerDelegate,
-                           OnReceivedData);
+                           OnReceivedDataDelegate);
 
-            if (BundleId == null)
+            if (SessionId == null)
             {
-                Debug.Log("[MPCTransport] Initialized without BundleId");
+                Debug.Log("[MPCTransport] Initialized without session Id");
             }
             else
             {
-                Debug.Log($"[MPCTransport] Initilized with BundleId: {BundleId}");
+                Debug.Log($"[MPCTransport] Initilized with session Id: {SessionId}");
             }
         }
 
         public override bool StartServer()
         {
             if (AutomaticAdvertising)
-                MPC_StartAdvertising(BundleId);
+                MPC_StartAdvertising(SessionId);
             return true;
         }
 
         public override bool StartClient()
         {
             if (AutomaticBrowsing)
-                MPC_StartBrowsing(BundleId);
+                MPC_StartBrowsing(SessionId);
             return true;
         }
 
-        public static void StartAdvertising()
+        public void StartAdvertising()
         {
             if (IsRuntime)
-                MPC_StartAdvertising(BundleId);
+                MPC_StartAdvertising(SessionId);
             else
                 Debug.Log("[MPCTransport] Cannot advertise on the current platform.");
         }
 
-        public static void StopAdvertising()
+        public void StopAdvertising()
         {
             if (IsRuntime)
                 MPC_StopAdvertising();
         }
 
-        public static void StartBrowsing()
+        public void StartBrowsing()
         {
             if (IsRuntime)
-                MPC_StartBrowsing(BundleId);
+                MPC_StartBrowsing(SessionId);
             else
                 Debug.Log("[MPCTransport] Cannot browse on the current platform.");
         }
 
-        public static void StopBrowsing()
+        public void StopBrowsing()
         {
             if (IsRuntime)
                 MPC_StopBrowsing();
@@ -248,7 +250,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             Debug.Log("[MPCTransport] Shutdown");
             MPC_Shutdown();
-            BundleId = null;
+            SessionId = null;
         }
     }
 }
