@@ -3,6 +3,10 @@ using Unity.Netcode;
 
 public class RttCounter : NetworkBehaviour
 {
+    public float Rtt => _rtt;
+
+    private float _rtt = 0f;
+
     public override void OnNetworkSpawn()
     {
         Debug.Log($"[RttCounter] OnNetworkSpawn");
@@ -34,7 +38,6 @@ public class RttCounter : NetworkBehaviour
     [ClientRpc]
     private void RespondRttClientRpc(float clientTimestamp, ClientRpcParams _ = default)
     {
-        float rtt = (Time.time - clientTimestamp) * 1000f;
-        Debug.Log($"[RttCounter] Rtt is {rtt} ms");
+        _rtt = (Time.time - clientTimestamp) * 1000f;
     }
 }
