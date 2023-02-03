@@ -37,7 +37,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         public bool AutoApproveConnectionRequest = true;
 
         [Header("Client Config")]
-        [Tooltip("Setting this to true to automatically browsing after starting client. " +
+        [Tooltip("Setting this to true to automatically browse after starting client. " +
             "Otherwise, you will need to manually call StartBrowsing().")]
         public bool AutoBrowse = true;
 
@@ -45,7 +45,7 @@ namespace Netcode.Transports.MultipeerConnectivity
             "Otherwise, you will need to manually send connection request to a host.")]
         public bool AutoSendConnectionRequest = true;
 
-        public Dictionary<int, string> BrowsedHostDict => _browsedHostDict;
+        public Dictionary<int, string> HostPeerDict => _hostPeerDict;
 
         public Dictionary<int, string> ConnectionRequestDict => _connectionRequestDict;
 
@@ -53,7 +53,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// Stores all browsed nearby hosts. The first parameter is the browsed host key
         /// and the second is the browsed host name.
         /// </summary>
-        private readonly Dictionary<int, string> _browsedHostDict = new();
+        private readonly Dictionary<int, string> _hostPeerDict = new();
 
         /// <summary>
         /// Stores all received connection requests. The first parameter is the connection request key
@@ -67,8 +67,8 @@ namespace Netcode.Transports.MultipeerConnectivity
         private static bool IsRuntime => Application.platform == RuntimePlatform.IPhonePlayer;
 
         [DllImport("__Internal")]
-        private static extern void MPC_Initialize(Action<int, string> OnBrowserFoundHost,
-                                                  Action<int, string> OnBrowserLostHost,
+        private static extern void MPC_Initialize(Action<int, string> OnBrowserFoundPeer,
+                                                  Action<int, string> OnBrowserLostPeer,
                                                   Action<int, string> OnAdvertiserReceivedConnectionRequest,
                                                   Action<string> OnConnectingWithPeer,
                                                   Action<int, string> OnConnectedWithPeer,
@@ -122,9 +122,9 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// <summary>
         /// Send connection request to a specific browsed host.
         /// </summary>
-        /// <param name="browsedHostKey">The key of the host in the dict</param>
+        /// <param name="hostPeerKey">The key of the host in the dict</param>
         [DllImport("__Internal")]
-        private static extern void MPC_SendConnectionRequest(int browsedHostKey);
+        private static extern void MPC_SendConnectionRequest(int hostPeerKey);
 
         /// <summary>
         /// Approve the connection request sent by a specific client.
@@ -136,34 +136,34 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// <summary>
         /// Links to a native callback which is invoked when the browser finds a new nearby host host.
         /// </summary>
-        /// <param name="browsedHostKey">The key of the host in the dict</param>
-        /// <param name="browsedHostName">The name of the host</param>
+        /// <param name="hostPeerKey">The key of the host in the dict</param>
+        /// <param name="hostPeerName">The name of the host</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
-        private static void OnBrowserFoundHostDelegate(int browsedHostKey, string browsedHostName)
+        private static void OnBrowserFoundPeerDelegate(int hostPeerKey, string hostPeerName)
         {
             if (s_instance != null)
             {
                 // Add browsed host to the dict
-                s_instance._browsedHostDict.Add(browsedHostKey, browsedHostName);
+                s_instance._hostPeerDict.Add(hostPeerKey, hostPeerName);
                 // Invoke the event
-                s_instance.OnBrowserFoundHost?.Invoke(browsedHostKey, browsedHostName);
+                s_instance.OnBrowserFoundPeer?.Invoke(hostPeerKey, hostPeerName);
             } 
         }
 
         /// <summary>
         /// Links to a native callback which is invoked when the browser loses a host.
         /// </summary>
-        /// <param name="browsedHostKey">The key of the host in the dict</param>
-        /// <param name="browsedHostName">The name of the host</param>
+        /// <param name="hostPeerKey">The key of the host in the dict</param>
+        /// <param name="hostPeerName">The name of the host</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
-        private static void OnBrowserLostHostDelegate(int browsedHostKey, string browsedHostName)
+        private static void OnBrowserLostPeerDelegate(int hostPeerKey, string hostPeerName)
         {
             if (s_instance != null)
             {
                 // Remove browsed host from the dict
-                s_instance._browsedHostDict.Remove(browsedHostKey);
+                s_instance._hostPeerDict.Remove(hostPeerKey);
                 // Invoke the event
-                s_instance.OnBrowserLostHost?.Invoke(browsedHostKey, browsedHostName);
+                s_instance.OnBrowserLostPeer?.Invoke(hostPeerKey, hostPeerName);
             }
         }
 
@@ -184,6 +184,10 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Links to a native callback which is invoked when the local peer is connecting with a peer.
+        /// </summary>
+        /// <param name="peerName">The name of the peer</param>
         [AOT.MonoPInvokeCallback(typeof(Action<string>))]
         private static void OnConnectingWithPeerDelegate(string peerName)
         {
@@ -193,6 +197,11 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Links to a native callback which is invoked when the local peer is connected with a peer.
+        /// </summary>
+        /// <param name="transportID">The transport id of the peer</param>
+        /// <param name="peerName">The name of the peer</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
         private static void OnConnectedWithPeerDelegate(int transportID, string peerName)
         {
@@ -203,6 +212,11 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Links to a native callback which is invoked when the local peer is disconnected with a peer.
+        /// </summary>
+        /// <param name="transportID">The transport id of the peer</param>
+        /// <param name="peerName">The name of the peer</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
         private static void OnDisconnectedWithPeerDelegate(int transportID, string peerName)
         {
@@ -213,6 +227,12 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Links to a native callback which is invoked when the local peer receives data from a peer.
+        /// </summary>
+        /// <param name="transportID">The transport id of the peer</param>
+        /// <param name="dataPtr">The pointer to the raw data</param>
+        /// <param name="length">The length of the data array</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, IntPtr, int>))]
         private static void OnReceivedDataDelegate(int transportID, IntPtr dataPtr, int length)
         {
@@ -225,9 +245,19 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
-        public event Action<int, string> OnBrowserFoundHost;
+        /// <summary>
+        /// Invoked when the browser finds a nearby host peer.
+        /// The first parameter is the host peer key in the dict.
+        /// The second parameter is the name of the host peer.
+        /// </summary>
+        public event Action<int, string> OnBrowserFoundPeer;
 
-        public event Action<int, string> OnBrowserLostHost;
+        /// <summary>
+        /// Invoked when the browser loses a nearby host peer.
+        /// The first parameter is the host peer key in the dict.
+        /// The second parameter is the name of the host peer.
+        /// </summary>
+        public event Action<int, string> OnBrowserLostPeer;
 
         public event Action<int, string> OnAdvertiserReceivedConnectionRequest;
 
@@ -247,8 +277,8 @@ namespace Netcode.Transports.MultipeerConnectivity
 
         public override void Initialize(NetworkManager networkManager)
         {
-            MPC_Initialize(OnBrowserFoundHostDelegate,
-                           OnBrowserLostHostDelegate,
+            MPC_Initialize(OnBrowserFoundPeerDelegate,
+                           OnBrowserLostPeerDelegate,
                            OnAdvertiserReceivedConnectionRequestDelegate,
                            OnConnectingWithPeerDelegate,
                            OnConnectedWithPeerDelegate,
@@ -269,7 +299,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (AutoAdvertise)
             {
-                MPC_StartAdvertising(SessionId, AutoApproveConnectionRequest);
+                StartAdvertising();
             }
             return true;
         }
@@ -278,7 +308,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (AutoBrowse)
             {
-                MPC_StartBrowsing(SessionId, AutoSendConnectionRequest);
+                StartBrowsing();
             }
             return true;
         }
@@ -324,6 +354,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (IsRuntime)
             {
+                _connectionRequestDict.Clear();
                 MPC_StartAdvertising(SessionId, AutoApproveConnectionRequest);
             }
         }
@@ -340,6 +371,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (IsRuntime)
             {
+                _hostPeerDict.Clear();
                 MPC_StartBrowsing(SessionId, AutoSendConnectionRequest);
             }
         }
@@ -352,9 +384,9 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
-        public void SendConnectionRequest(int browsedHostKey)
+        public void SendConnectionRequest(int hostPeerKey)
         {
-            MPC_SendConnectionRequest(browsedHostKey);
+            MPC_SendConnectionRequest(hostPeerKey);
         }
 
         public void ApproveConnectionRequest(int connectionRequestKey)
