@@ -14,6 +14,6 @@ public class RttDisplay : MonoBehaviour
 
     private void Update()
     {
-        _rttText.text = $"{Mathf.Floor(_rttCounter.Rtt)} ms";
+        _rttText.text = $"{_rttCounter.Rtt:F4} ms";
     }
 }
