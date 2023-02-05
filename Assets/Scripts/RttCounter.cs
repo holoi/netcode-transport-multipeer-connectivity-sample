@@ -7,11 +7,6 @@ public class RttCounter : NetworkBehaviour
 
     private float _rtt = 0f;
 
-    public override void OnNetworkSpawn()
-    {
-        Debug.Log($"[RttCounter] OnNetworkSpawn");
-    }
-
     private void Update()
     {
         if (IsSpawned && !IsServer)

@@ -49,6 +49,20 @@ namespace Netcode.Transports.MultipeerConnectivity
 
         public Dictionary<int, string> ConnectionRequestDict => _connectionRequestDict;
 
+        public bool IsAdvertising => _isAdvertising;
+
+        public bool IsBrowsing => _isBrowsing;
+        
+        /// <summary>
+        /// Showing whether the device is currently advertising itself.
+        /// </summary>
+        private bool _isAdvertising = false;
+
+        /// <summary>
+        /// Showing whether the device is currently browsing for nearby peers.
+        /// </summary>
+        private bool _isBrowsing = false;
+
         /// <summary>
         /// Stores all browsed nearby hosts. The first parameter is the browsed host key
         /// and the second is the browsed host name.
@@ -64,8 +78,18 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// <summary>
         /// Check if we are currently running on an iOS device.
         /// </summary>
-        private static bool IsRuntime => Application.platform == RuntimePlatform.IPhonePlayer;
+        public static bool IsRuntime => Application.platform == RuntimePlatform.IPhonePlayer;
 
+        /// <summary>
+        /// Initialize the MPCSession and register native callbacks.
+        /// </summary>
+        /// <param name="OnBrowserFoundPeer">Invoked when the browser finds a peer</param>
+        /// <param name="OnBrowserLostPeer">Invoked when the browser loses a peer</param>
+        /// <param name="OnAdvertiserReceivedConnectionRequest">Invoked when the advertiser receives a connection request</param>
+        /// <param name="OnConnectingWithPeer">Invoked when connecting with a peer</param>
+        /// <param name="OnConnectedWithPeer">Invoked when connected with a peer</param>
+        /// <param name="OnDisconnectedWithPeer">Invoked when disconnected with a peer</param>
+        /// <param name="OnReceivedData">Invoked when receives data message from a peer</param>
         [DllImport("__Internal")]
         private static extern void MPC_Initialize(Action<int, string> OnBrowserFoundPeer,
                                                   Action<int, string> OnBrowserLostPeer,
@@ -259,12 +283,22 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// </summary>
         public event Action<int, string> OnBrowserLostPeer;
 
+        /// <summary>
+        /// Invoked when the advertiser receives a connection request.
+        /// The first parameter is the connection request key in the dict.
+        /// The second parameter is the name of the peer who sent the connection request.
+        /// </summary>
         public event Action<int, string> OnAdvertiserReceivedConnectionRequest;
 
+        /// <summary>
+        /// Invoked when initializes connection with a new peer. This event should be used only for notification purpose.
+        /// The first parameter is the name of the connecting peer.
+        /// </summary>
         public event Action<string> OnConnectingWithPeer;
 
         private void Awake()
         {
+            // Initialize the singleton instance
             if (s_instance != null && s_instance != this)
             {
                 Destroy(gameObject);
@@ -277,6 +311,13 @@ namespace Netcode.Transports.MultipeerConnectivity
 
         public override void Initialize(NetworkManager networkManager)
         {
+            if (!IsRuntime)
+            {
+                Debug.LogError($"[MPCTransport] MPCTransport cannot run in Unity Editor, it can only run on an iOS device. " +
+                    $"If you want to test your project in Unity Editor, please use Unity Transport instead when debugging.");
+                return;
+            }
+
             MPC_Initialize(OnBrowserFoundPeerDelegate,
                            OnBrowserLostPeerDelegate,
                            OnAdvertiserReceivedConnectionRequestDelegate,
@@ -347,51 +388,64 @@ namespace Netcode.Transports.MultipeerConnectivity
 
         public override void Shutdown()
         {
-            MPC_Shutdown();
+            if (IsRuntime)
+            {
+                MPC_Shutdown();
+            }
         }
 
         public void StartAdvertising()
         {
-            if (IsRuntime)
+            if (IsRuntime && !_isAdvertising)
             {
                 _connectionRequestDict.Clear();
                 MPC_StartAdvertising(SessionId, AutoApproveConnectionRequest);
+                _isAdvertising = true;
             }
         }
 
         public void StopAdvertising()
         {
-            if (IsRuntime)
+            if (IsRuntime && _isAdvertising)
             {
                 MPC_StopAdvertising();
+                _isAdvertising = false;
             }
         }
 
         public void StartBrowsing()
         {
-            if (IsRuntime)
+            if (IsRuntime && !_isBrowsing)
             {
                 _hostPeerDict.Clear();
                 MPC_StartBrowsing(SessionId, AutoSendConnectionRequest);
+                _isBrowsing = true;
             }
         }
 
         public void StopBrowsing()
         {
-            if (IsRuntime)
+            if (IsRuntime && _isBrowsing)
             {
                 MPC_StopBrowsing();
+                _isBrowsing = false;
             }
         }
 
         public void SendConnectionRequest(int hostPeerKey)
         {
-            MPC_SendConnectionRequest(hostPeerKey);
+            if (IsRuntime)
+            {
+                MPC_SendConnectionRequest(hostPeerKey);
+            }
         }
 
         public void ApproveConnectionRequest(int connectionRequestKey)
         {
-            MPC_ApproveConnectionRequest(connectionRequestKey);
+            if (IsRuntime)
+            {
+                MPC_ApproveConnectionRequest(connectionRequestKey);
+            }
         }
     }
 }
