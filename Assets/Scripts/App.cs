@@ -3,7 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Netcode.Transports.MultipeerConnectivity;
 
-public class App : NetworkBehaviour
+public class App : MonoBehaviour
 {
     [SerializeField] private Player _playerPrefab;
 
@@ -19,18 +19,16 @@ public class App : NetworkBehaviour
         Player.OnPlayerDespawned += OnPlayerDespawned;
     }
 
-    public override void OnDestroy()
+    private void OnDestroy()
     {
         // Static events must be unregistered, otherwise the app will crash
         Player.OnPlayerSpawned -= OnPlayerSpawned;
         Player.OnPlayerDespawned -= OnPlayerDespawned;
-
-        base.OnDestroy();
     }
 
     private void OnClientConnected(ulong clientId)
     {
-        if (IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             SpawnPlayer(clientId);
         }
@@ -38,7 +36,7 @@ public class App : NetworkBehaviour
 
     private void OnClientDisconnected(ulong clientId)
     {
-        if (IsServer)
+        if (NetworkManager.Singleton.IsServer)
         {
             if (_playerDict.ContainsKey(clientId))
             {
