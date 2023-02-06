@@ -47,7 +47,7 @@ namespace Netcode.Transports.MultipeerConnectivity
 
         public Dictionary<int, string> NearbyHostDict => _nearbyHostDict;
 
-        public Dictionary<int, string> ConnectionRequestDict => _connectionRequestDict;
+        public Dictionary<int, string> PendingConnectionRequestDict => _pendingConnectionRequestDict;
 
         public bool IsAdvertising => _isAdvertising;
 
@@ -73,7 +73,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// Stores all received connection requests. The first parameter is the connection request key
         /// and the second is the name of the client who sent the connection request.
         /// </summary>
-        private readonly Dictionary<int, string> _connectionRequestDict = new();
+        private readonly Dictionary<int, string> _pendingConnectionRequestDict = new();
 
         /// <summary>
         /// Check if we are currently running on an iOS device.
@@ -83,21 +83,25 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// <summary>
         /// Initialize the MPCSession and register native callbacks.
         /// </summary>
-        /// <param name="OnBrowserFoundPeer">Invoked when the browser finds a peer</param>
-        /// <param name="OnBrowserLostPeer">Invoked when the browser loses a peer</param>
-        /// <param name="OnAdvertiserReceivedConnectionRequest">Invoked when the advertiser receives a connection request</param>
-        /// <param name="OnConnectingWithPeer">Invoked when connecting with a peer</param>
-        /// <param name="OnConnectedWithPeer">Invoked when connected with a peer</param>
-        /// <param name="OnDisconnectedWithPeer">Invoked when disconnected with a peer</param>
-        /// <param name="OnReceivedData">Invoked when receives data message from a peer</param>
+        /// <param name="nickname">The name of the device displayed in the network</param>
+        /// <param name="onBrowserFoundPeer">Invoked when the browser finds a peer</param>
+        /// <param name="onBrowserLostPeer">Invoked when the browser loses a peer</param>
+        /// <param name="onAdvertiserReceivedConnectionRequest">Invoked when the advertiser receives a connection request</param>
+        /// <param name="onAdvertiserApprovedConnectionRequest">Invoked when the advertiser approves a connection request</param>
+        /// <param name="onConnectingWithPeer">Invoked when connecting with a peer</param>
+        /// <param name="onConnectedWithPeer">Invoked when connected with a peer</param>
+        /// <param name="onDisconnectedWithPeer">Invoked when disconnected with a peer</param>
+        /// <param name="onReceivedData">Invoked when receives data message from a peer</param>
         [DllImport("__Internal")]
-        private static extern void MPC_Initialize(Action<int, string> OnBrowserFoundPeer,
-                                                  Action<int, string> OnBrowserLostPeer,
-                                                  Action<int, string> OnAdvertiserReceivedConnectionRequest,
-                                                  Action<string> OnConnectingWithPeer,
-                                                  Action<int, string> OnConnectedWithPeer,
-                                                  Action<int, string> OnDisconnectedWithPeer,
-                                                  Action<int, IntPtr, int> OnReceivedData);
+        private static extern void MPC_Initialize(string nickname,
+                                                  Action<int, string> onBrowserFoundPeer,
+                                                  Action<int, string> onBrowserLostPeer,
+                                                  Action<int, string> onAdvertiserReceivedConnectionRequest,
+                                                  Action<int> onAdvertiserApprovedConnectionRequest,
+                                                  Action<string> onConnectingWithPeer,
+                                                  Action<int, string> onConnectedWithPeer,
+                                                  Action<int, string> onDisconnectedWithPeer,
+                                                  Action<int, IntPtr, int> onReceivedData);
 
         /// <summary>
         /// Start advertising to allow nearby peers to find you.
@@ -195,16 +199,38 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// Links to a native callback which is invoked when the advertiser receives a connection request.
         /// </summary>
         /// <param name="connectionRequestKey">The key of the connection request in the dict</param>
-        /// <param name="clientName">The name of the client who sent the connection request</param>
+        /// <param name="senderName">The name of the client who sent the connection request</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
-        private static void OnAdvertiserReceivedConnectionRequestDelegate(int connectionRequestKey, string clientName)
+        private static void OnAdvertiserReceivedConnectionRequestDelegate(int connectionRequestKey, string senderName)
         {
             if (s_instance != null)
             {
-                // Add connection request to the dict
-                s_instance._connectionRequestDict.Add(connectionRequestKey, clientName);
+                if (!s_instance.AutoApproveConnectionRequest)
+                {
+                    // Add connection request to the dict
+                    s_instance._pendingConnectionRequestDict.Add(connectionRequestKey, senderName);
+                }
                 // Invoke the event
-                s_instance.OnAdvertiserReceivedConnectionRequest?.Invoke(connectionRequestKey, clientName);
+                s_instance.OnAdvertiserReceivedConnectionRequest?.Invoke(connectionRequestKey, senderName);
+            }
+        }
+
+        /// <summary>
+        /// Links to a native callback which is invoked when the advertiser handles a connection request.
+        /// </summary>
+        /// <param name="connectionRequestKey">The key of the connection request in the dict</param>
+        [AOT.MonoPInvokeCallback(typeof(Action<int>))]
+        private static void OnAdvertiserApprovedConnectionRequestDelegate(int connectionRequestKey)
+        {
+            if (s_instance != null)
+            {
+                if (s_instance._pendingConnectionRequestDict.ContainsKey(connectionRequestKey))
+                {
+                    // Remove the connection request from the dict
+                    s_instance._pendingConnectionRequestDict.Remove(connectionRequestKey);
+                }
+                // Invoke the event
+                s_instance.OnAdvertiserApprovedConnectionRequest?.Invoke(connectionRequestKey);
             }
         }
 
@@ -233,6 +259,9 @@ namespace Netcode.Transports.MultipeerConnectivity
             {
                 s_instance.InvokeOnTransportEvent(NetworkEvent.Connect, (ulong)transportID,
                     default, Time.realtimeSinceStartup);
+
+                s_instance._isBrowsing = false;
+                s_instance._nearbyHostDict.Clear();
             }
         }
 
@@ -290,6 +319,8 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// </summary>
         public event Action<int, string> OnAdvertiserReceivedConnectionRequest;
 
+        public event Action<int> OnAdvertiserApprovedConnectionRequest;
+
         /// <summary>
         /// Invoked when initializes connection with a new peer. This event should be used only for notification purpose.
         /// The first parameter is the name of the connecting peer.
@@ -318,22 +349,15 @@ namespace Netcode.Transports.MultipeerConnectivity
                 return;
             }
 
-            MPC_Initialize(OnBrowserFoundPeerDelegate,
+            MPC_Initialize(Nickname,
+                           OnBrowserFoundPeerDelegate,
                            OnBrowserLostPeerDelegate,
                            OnAdvertiserReceivedConnectionRequestDelegate,
+                           OnAdvertiserApprovedConnectionRequestDelegate,
                            OnConnectingWithPeerDelegate,
                            OnConnectedWithPeerDelegate,
                            OnDisconnectedWithPeerDelegate,
                            OnReceivedDataDelegate);
-
-            if (SessionId == null)
-            {
-                Debug.Log("[MPCTransport] Initialized without session id");
-            }
-            else
-            {
-                Debug.Log($"[MPCTransport] Initilized with session id: {SessionId}");
-            }
         }
 
         public override bool StartServer()
@@ -391,6 +415,11 @@ namespace Netcode.Transports.MultipeerConnectivity
             if (IsRuntime)
             {
                 MPC_Shutdown();
+                // Reset variables
+                _pendingConnectionRequestDict.Clear();
+                _nearbyHostDict.Clear();
+                _isAdvertising = false;
+                _isBrowsing = false;
             }
         }
 
@@ -398,7 +427,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (IsRuntime && !_isAdvertising)
             {
-                _connectionRequestDict.Clear();
+                _pendingConnectionRequestDict.Clear();
                 MPC_StartAdvertising(SessionId, AutoApproveConnectionRequest);
                 _isAdvertising = true;
             }
@@ -410,7 +439,7 @@ namespace Netcode.Transports.MultipeerConnectivity
             {
                 MPC_StopAdvertising();
                 _isAdvertising = false;
-                _connectionRequestDict.Clear();
+                _pendingConnectionRequestDict.Clear();
             }
         }
 
@@ -430,6 +459,7 @@ namespace Netcode.Transports.MultipeerConnectivity
             {
                 MPC_StopBrowsing();
                 _isBrowsing = false;
+                _nearbyHostDict.Clear();
             }
         }
 
@@ -446,8 +476,6 @@ namespace Netcode.Transports.MultipeerConnectivity
             if (IsRuntime)
             {
                 MPC_ApproveConnectionRequest(connectionRequestKey);
-                // The approved connection request should no longer stay in the dict
-                _connectionRequestDict.Remove(connectionRequestKey);
             }
         }
     }

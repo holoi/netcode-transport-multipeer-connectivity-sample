@@ -31,9 +31,9 @@ public class ConnectionRequestList : MonoBehaviour
         }
         _connectionRequestSlotList.Clear();
 
-        foreach (var connectionRequestKey in _mpcTransport.ConnectionRequestDict.Keys)
+        foreach (var connectionRequestKey in _mpcTransport.PendingConnectionRequestDict.Keys)
         {
-            var senderName = _mpcTransport.ConnectionRequestDict[connectionRequestKey];
+            var senderName = _mpcTransport.PendingConnectionRequestDict[connectionRequestKey];
 
             var connectionRequestSlotInstance = Instantiate(_connectionRequestSlotPrefab);
             connectionRequestSlotInstance.Init(connectionRequestKey, senderName);
