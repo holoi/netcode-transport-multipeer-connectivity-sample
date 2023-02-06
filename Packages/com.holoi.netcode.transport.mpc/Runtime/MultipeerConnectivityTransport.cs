@@ -45,7 +45,7 @@ namespace Netcode.Transports.MultipeerConnectivity
             "Otherwise, you will need to manually send connection request to a host.")]
         public bool AutoSendConnectionRequest = true;
 
-        public Dictionary<int, string> HostPeerDict => _hostPeerDict;
+        public Dictionary<int, string> NearbyHostDict => _nearbyHostDict;
 
         public Dictionary<int, string> ConnectionRequestDict => _connectionRequestDict;
 
@@ -67,7 +67,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// Stores all browsed nearby hosts. The first parameter is the browsed host key
         /// and the second is the browsed host name.
         /// </summary>
-        private readonly Dictionary<int, string> _hostPeerDict = new();
+        private readonly Dictionary<int, string> _nearbyHostDict = new();
 
         /// <summary>
         /// Stores all received connection requests. The first parameter is the connection request key
@@ -146,9 +146,9 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// <summary>
         /// Send connection request to a specific browsed host.
         /// </summary>
-        /// <param name="hostPeerKey">The key of the host in the dict</param>
+        /// <param name="nearbyHostKey">The key of the host in the dict</param>
         [DllImport("__Internal")]
-        private static extern void MPC_SendConnectionRequest(int hostPeerKey);
+        private static extern void MPC_SendConnectionRequest(int nearbyHostKey);
 
         /// <summary>
         /// Approve the connection request sent by a specific client.
@@ -160,34 +160,34 @@ namespace Netcode.Transports.MultipeerConnectivity
         /// <summary>
         /// Links to a native callback which is invoked when the browser finds a new nearby host host.
         /// </summary>
-        /// <param name="hostPeerKey">The key of the host in the dict</param>
-        /// <param name="hostPeerName">The name of the host</param>
+        /// <param name="nearbyHostKey">The key of the host in the dict</param>
+        /// <param name="nearbyHostName">The name of the host</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
-        private static void OnBrowserFoundPeerDelegate(int hostPeerKey, string hostPeerName)
+        private static void OnBrowserFoundPeerDelegate(int nearbyHostKey, string nearbyHostName)
         {
             if (s_instance != null)
             {
                 // Add browsed host to the dict
-                s_instance._hostPeerDict.Add(hostPeerKey, hostPeerName);
+                s_instance._nearbyHostDict.Add(nearbyHostKey, nearbyHostName);
                 // Invoke the event
-                s_instance.OnBrowserFoundPeer?.Invoke(hostPeerKey, hostPeerName);
+                s_instance.OnBrowserFoundPeer?.Invoke(nearbyHostKey, nearbyHostName);
             } 
         }
 
         /// <summary>
         /// Links to a native callback which is invoked when the browser loses a host.
         /// </summary>
-        /// <param name="hostPeerKey">The key of the host in the dict</param>
-        /// <param name="hostPeerName">The name of the host</param>
+        /// <param name="nearbyHostKey">The key of the host in the dict</param>
+        /// <param name="nearbyHostName">The name of the host</param>
         [AOT.MonoPInvokeCallback(typeof(Action<int, string>))]
-        private static void OnBrowserLostPeerDelegate(int hostPeerKey, string hostPeerName)
+        private static void OnBrowserLostPeerDelegate(int nearbyHostKey, string nearbyHostName)
         {
             if (s_instance != null)
             {
                 // Remove browsed host from the dict
-                s_instance._hostPeerDict.Remove(hostPeerKey);
+                s_instance._nearbyHostDict.Remove(nearbyHostKey);
                 // Invoke the event
-                s_instance.OnBrowserLostPeer?.Invoke(hostPeerKey, hostPeerName);
+                s_instance.OnBrowserLostPeer?.Invoke(nearbyHostKey, nearbyHostName);
             }
         }
 
@@ -410,6 +410,7 @@ namespace Netcode.Transports.MultipeerConnectivity
             {
                 MPC_StopAdvertising();
                 _isAdvertising = false;
+                _connectionRequestDict.Clear();
             }
         }
 
@@ -417,7 +418,7 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (IsRuntime && !_isBrowsing)
             {
-                _hostPeerDict.Clear();
+                _nearbyHostDict.Clear();
                 MPC_StartBrowsing(SessionId, AutoSendConnectionRequest);
                 _isBrowsing = true;
             }
@@ -432,11 +433,11 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
-        public void SendConnectionRequest(int hostPeerKey)
+        public void SendConnectionRequest(int nearbyHostKey)
         {
             if (IsRuntime)
             {
-                MPC_SendConnectionRequest(hostPeerKey);
+                MPC_SendConnectionRequest(nearbyHostKey);
             }
         }
 
@@ -445,6 +446,8 @@ namespace Netcode.Transports.MultipeerConnectivity
             if (IsRuntime)
             {
                 MPC_ApproveConnectionRequest(connectionRequestKey);
+                // The approved connection request should no longer stay in the dict
+                _connectionRequestDict.Remove(connectionRequestKey);
             }
         }
     }

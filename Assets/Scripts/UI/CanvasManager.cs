@@ -9,7 +9,17 @@ public class CanvasManager : MonoBehaviour
 
     [SerializeField] private GameObject _clientPanel;
 
+    private void Start()
+    {
+        UpdateCurrentPanel();
+    }
+
     private void Update()
+    {
+        UpdateCurrentPanel();
+    }
+
+    private void UpdateCurrentPanel()
     {
         if (NetworkManager.Singleton.IsServer)
         {

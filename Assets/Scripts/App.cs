@@ -52,7 +52,7 @@ public class App : MonoBehaviour
     private void SpawnPlayer(ulong clientId)
     {
         var playerInstance = Instantiate(_playerPrefab);
-        _playerPrefab.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+        playerInstance.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
     }
 
     private void OnPlayerSpawned(Player player)

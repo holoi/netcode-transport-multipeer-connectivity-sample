@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using TMPro;
 
 public class ConnectedPlayerList : MonoBehaviour
@@ -19,6 +20,9 @@ public class ConnectedPlayerList : MonoBehaviour
 
     private void Update()
     {
+        // We destroy and instantiate every connection request slot in every frame.
+        // This is wasteful and unnecessary. But it is less error-prone.
+        // You can register callbacks instead.
         foreach (var playerSlot in _playerSlotList)
         {
             Destroy(playerSlot);
@@ -27,9 +31,21 @@ public class ConnectedPlayerList : MonoBehaviour
 
         foreach (var player in _app.PlayerDict.Values)
         {
+            // Instantiate the player slot prefab
             var playerSlotInstance = Instantiate(_playerSlotPrefab);
-            playerSlotInstance.GetComponentInChildren<TMP_Text>().text = player.Nickname.Value.ToString();
+            // Set the nickname of the slot
+            string nickname = player.Nickname.Value.ToString();
+            // If this is the local player
+            if (player.OwnerClientId == NetworkManager.Singleton.LocalClientId)
+            {
+                nickname += " (You)";
+            }
+            playerSlotInstance.GetComponentInChildren<TMP_Text>().text = nickname;
+            // Attach the slot instance to the list root
+            playerSlotInstance.transform.localScale = Vector3.one;
             playerSlotInstance.transform.SetParent(_root);
+
+            _playerSlotList.Add(playerSlotInstance);
         }
     }
 }
