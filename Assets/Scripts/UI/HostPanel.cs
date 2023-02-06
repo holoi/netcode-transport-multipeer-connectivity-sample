@@ -16,24 +16,18 @@ public class HostPanel : MonoBehaviour
     private void Update()
     {
         var mpcTransport = MultipeerConnectivityTransport.Instance;
-        if (mpcTransport.AutoAdvertise)
+
+        if (mpcTransport.IsAdvertising)
         {
-            _advertisingStatusText.text = ADVERTISING_STATUS_PREFIX + "Auto Advertising";
+            _advertisingStatusText.text = ADVERTISING_STATUS_PREFIX + "Advertising";
             _startAdvertisingButton.interactable = false;
-            _stopAdvertisingButton.interactable = false;
+            _stopAdvertisingButton.interactable = true;
         }
         else
         {
+            _advertisingStatusText.text = ADVERTISING_STATUS_PREFIX + "Not Advertising";
             _startAdvertisingButton.interactable = true;
-            _stopAdvertisingButton.interactable = true;
-            if (mpcTransport.IsAdvertising)
-            {
-                _advertisingStatusText.text = ADVERTISING_STATUS_PREFIX + "Advertising";
-            }
-            else
-            {
-                _advertisingStatusText.text = ADVERTISING_STATUS_PREFIX + "Not Advertising";
-            }
+            _stopAdvertisingButton.interactable = false;
         }
     }
 }

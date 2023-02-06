@@ -16,24 +16,17 @@ public class ClientPanel : MonoBehaviour
     private void Start()
     {
         var mpcTransport = MultipeerConnectivityTransport.Instance;
-        if (mpcTransport.AutoBrowse)
+        if (mpcTransport.IsBrowsing)
         {
-            _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Auto Browsing";
+            _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Browsing";
             _startBrowsingButton.interactable = false;
-            _stopBrowsingButton.interactable = false;
+            _stopBrowsingButton.interactable = true;
         }
         else
         {
+            _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Not Browsing";
             _startBrowsingButton.interactable = true;
-            _stopBrowsingButton.interactable = true;
-            if (mpcTransport.IsBrowsing)
-            {
-                _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Browsing";
-            }
-            else
-            {
-                _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Not Browsing";
-            }
+            _stopBrowsingButton.interactable = false;
         }
     }
 }

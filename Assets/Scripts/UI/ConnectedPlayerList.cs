@@ -16,9 +16,29 @@ public class ConnectedPlayerList : MonoBehaviour
     private void Start()
     {
         _app = FindObjectOfType<App>();
+
+        Player.OnPlayerSpawned += OnPlayerSpawned;
+        Player.OnPlayerDespawned += OnPlayerDespawned;
+        UpdateConnectedPlayerList();
     }
 
-    private void Update()
+    private void OnDestroy()
+    {
+        Player.OnPlayerSpawned -= OnPlayerSpawned;
+        Player.OnPlayerDespawned -= OnPlayerDespawned;
+    }
+
+    private void OnPlayerSpawned(Player _)
+    {
+        UpdateConnectedPlayerList();
+    }
+
+    private void OnPlayerDespawned(Player _)
+    {
+        UpdateConnectedPlayerList();
+    }
+
+    private void UpdateConnectedPlayerList()
     {
         // We destroy and instantiate every connection request slot in every frame.
         // This is wasteful and unnecessary. But it is less error-prone.

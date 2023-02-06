@@ -18,13 +18,24 @@ public class ConnectionRequestList : MonoBehaviour
     {
         // Get the reference of the MPC transport
         _mpcTransport = MultipeerConnectivityTransport.Instance;
+
+        _mpcTransport.OnAdvertiserReceivedConnectionRequest += OnAdvertiserReceivedConnectionRequest;
+        _mpcTransport.OnAdvertiserApprovedConnectionRequest += OnAdvertiserApprovedConnectionRequest;
+        UpdateConnectionRequestList();
     }
 
-    private void Update()
+    private void OnAdvertiserReceivedConnectionRequest(int _, string senderName)
     {
-        // We destroy and instantiate every connection request slot in every frame.
-        // This is wasteful and unnecessary. But it is less error-prone.
-        // You can register callbacks instead.
+        UpdateConnectionRequestList();
+    }
+
+    private void OnAdvertiserApprovedConnectionRequest(int _)
+    {
+        UpdateConnectionRequestList();
+    }
+
+    private void UpdateConnectionRequestList()
+    {
         foreach (var slot in _connectionRequestSlotList)
         {
             Destroy(slot.gameObject);

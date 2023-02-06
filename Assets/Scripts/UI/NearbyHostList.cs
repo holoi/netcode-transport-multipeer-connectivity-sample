@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using Netcode.Transports.MultipeerConnectivity;
 
 public class NearbyHostList : MonoBehaviour
@@ -18,9 +19,29 @@ public class NearbyHostList : MonoBehaviour
     {
         // Get the reference of the MPC transport
         _mpcTransport = MultipeerConnectivityTransport.Instance;
+
+        _mpcTransport.OnBrowserFoundPeer += OnBrowserFoundPeer;
+        _mpcTransport.OnBrowserLostPeer += OnBrowserLostPeer;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        UpdateNearbyHostList();
     }
 
-    private void Update()
+    private void OnBrowserFoundPeer(int _, string hostName)
+    {
+        UpdateNearbyHostList();
+    }
+
+    private void OnBrowserLostPeer(int _, string hostName)
+    {
+        UpdateNearbyHostList();
+    }
+
+    private void OnClientConnected(ulong _)
+    {
+        UpdateNearbyHostList();
+    }
+
+    private void UpdateNearbyHostList()
     {
         // We destroy and instantiate every connection request slot in every frame.
         // This is wasteful and unnecessary. But it is less error-prone.

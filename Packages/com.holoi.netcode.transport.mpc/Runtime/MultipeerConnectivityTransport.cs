@@ -257,11 +257,11 @@ namespace Netcode.Transports.MultipeerConnectivity
         {
             if (s_instance != null)
             {
-                s_instance.InvokeOnTransportEvent(NetworkEvent.Connect, (ulong)transportID,
-                    default, Time.realtimeSinceStartup);
-
                 s_instance._isBrowsing = false;
                 s_instance._nearbyHostDict.Clear();
+
+                s_instance.InvokeOnTransportEvent(NetworkEvent.Connect, (ulong)transportID,
+                    default, Time.realtimeSinceStartup);
             }
         }
 

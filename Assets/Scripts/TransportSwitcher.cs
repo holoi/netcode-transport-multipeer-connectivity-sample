@@ -22,6 +22,7 @@ public class TransportSwitcher : MonoBehaviour
         else
         {
             networkManager.NetworkConfig.NetworkTransport = unityTransport;
+            Debug.Log("You cannot test MPCTransport in Unity Editor. Now the app is using Unity Transport instead.");
         }
     }
 }
