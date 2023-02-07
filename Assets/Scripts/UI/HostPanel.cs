@@ -11,13 +11,18 @@ public class HostPanel : MonoBehaviour
 
     [SerializeField] private Button _stopAdvertisingButton;
 
+    private MultipeerConnectivityTransport _mpcTransport;
+
     private const string ADVERTISING_STATUS_PREFIX = "Advertising Status: ";
+
+    private void Start()
+    {
+        _mpcTransport = MultipeerConnectivityTransport.Instance;
+    }
 
     private void Update()
     {
-        var mpcTransport = MultipeerConnectivityTransport.Instance;
-
-        if (mpcTransport.IsAdvertising)
+        if (_mpcTransport.IsAdvertising)
         {
             _advertisingStatusText.text = ADVERTISING_STATUS_PREFIX + "Advertising";
             _startAdvertisingButton.interactable = false;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode;
 using Netcode.Transports.MultipeerConnectivity;
 
 public class ClientPanel : MonoBehaviour
@@ -11,12 +12,27 @@ public class ClientPanel : MonoBehaviour
 
     [SerializeField] private Button _stopBrowsingButton;
 
+    private MultipeerConnectivityTransport _mpcTransport;
+
     private const string BROWSING_STATUS_PFEFIX = "Browsing Status: ";
 
     private void Start()
     {
-        var mpcTransport = MultipeerConnectivityTransport.Instance;
-        if (mpcTransport.IsBrowsing)
+        _mpcTransport = MultipeerConnectivityTransport.Instance;
+    }
+
+    private void Update()
+    {
+        // The client can no longer browse after connected to the network
+        if (NetworkManager.Singleton.IsConnectedClient)
+        {
+            _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Not Browsing";
+            _startBrowsingButton.interactable = false;
+            _stopBrowsingButton.interactable = false;
+            return;
+        }
+
+        if (_mpcTransport.IsBrowsing)
         {
             _browsingStatusText.text = BROWSING_STATUS_PFEFIX + "Browsing";
             _startBrowsingButton.interactable = false;
