@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "com.holoi.netcode.transport.mpc": {
-      "version": "file:com.holoi.netcode.transport.mpc",
+    "com.holo-interactive.com.community.netcode.transport.multipeer-connectivity": {
+      "version": "file:com.community.netcode.transport.multipeer-connectivity",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.netcode.gameobjects": "1.0.1"
+        "com.unity.netcode.gameobjects": "1.1.0"
       }
     },
     "com.unity.burst": {
