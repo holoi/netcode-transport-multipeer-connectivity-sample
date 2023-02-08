@@ -26,11 +26,11 @@ When a host starts the network, it starts to advertise itself so that nearby bro
 
 ## How to Use The Transport
 
-We created a [sample project](https://github.com/holoi/UnityNetcodeMPCTransportSample) demonstrating how to properly setup the local network connection.
+We created a [sample project](https://github.com/holoi/UnityNetcodeMPCTransportSample) demonstrating how to properly setup the network connection.
 
 ### Transport Configurations
 
-Before start as either host or client, you can set the properties of the transport to adjust its behaviour to meet your needs.
+Before start as either host or client, you can set the properties of the transport to adjust its behaviour to meet your needs. Under the default configuration, nearby host and clients will automatically connected.
 
 <img width="363" alt="image" src="https://user-images.githubusercontent.com/44870300/217411500-35190153-683c-46a0-be16-34be3472f341.png">
 
