@@ -25,6 +25,19 @@ namespace Netcode.Transports.MultipeerConnectivity.Editor
                 array.AddString("_netcode-mpc._udp");
 
                 File.WriteAllText(plistPath, plist.WriteToString());
+
+                // For build settings
+                string projectPath = PBXProject.GetPBXProjectPath(buildPath);
+                PBXProject project = new();
+                project.ReadFromString(File.ReadAllText(projectPath));
+
+                string mainTargetGuid = project.GetUnityMainTargetGuid();
+                string unityFrameworkTargetGuid = project.GetUnityFrameworkTargetGuid();
+
+                project.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");
+                project.SetBuildProperty(unityFrameworkTargetGuid, "ENABLE_BITCODE", "NO");
+
+                project.WriteToFile(projectPath);
             }
         }
     }
