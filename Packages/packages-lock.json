@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.holo-interactive.com.community.netcode.transport.multipeer-connectivity": {
+    "com.community.netcode.transport.multipeer-connectivity": {
       "version": "file:com.community.netcode.transport.multipeer-connectivity",
       "depth": 0,
       "source": "embedded",
