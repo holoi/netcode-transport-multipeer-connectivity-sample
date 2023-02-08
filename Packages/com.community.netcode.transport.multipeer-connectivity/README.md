@@ -72,7 +72,7 @@ private void OnAdvertiserReceivedConnectionRequest(int connectionRequestKey, str
 }
 ```
 
-#### Client Configuration
+#### Client Configurations
 
 When property `AutoBrowse` is set to true, the device will automatically browse nearby hosts right after starting as client. Otherwise, you will need to start browsing manually.
 
@@ -100,3 +100,11 @@ private void OnBrowserFoundPeer(int nearbyHostKey, string nearbyHostName)
     }
 }
 ```
+
+### iOS Permissions
+
+When you build the project onto your iOS devices for the first time, both host and client devices will trigger the Local Network Permission. You must allow this permission to let your devices connect. Furthermore, the browser device will trigger another Wireless Data Permission. You need to also allow this permission as well.
+
+### Debug Your Project in Unity Editor
+
+Please notice that Multipeer Connectivity Transport can only run on an iOS device. It cannot run on your Mac. Therefore, when you want to debug your project in Unity Editor, we recommand you temporarily switch to use Unity Transport.
