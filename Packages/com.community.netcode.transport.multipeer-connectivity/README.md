@@ -4,6 +4,8 @@
 
 This package implemented the transport layer of Netcode for GameObjects with Apple Multipeer Connectivity, which can enable peer-to-peer communication between nearby devices. By using Multipeer Connectivity, nearby devices can connect to each other when there is no WiFi or cellular network. Multipeer Connectivity is the technology behind AirDrop, which means it can transfer large file between devices very fast. Please reference Apple's official document for detailed information: https://developer.apple.com/documentation/multipeerconnectivity.
 
+We created a [sample project](https://github.com/holoi/UnityNetcodeMPCTransportSample) demonstrating how to properly setup the network connection.
+
 ## Some Good to Know Concepts Before Using The Transport
 
 ### Host-Client Architecture vs Peer-To-Peer Architecture
@@ -24,11 +26,7 @@ In Multipeer Connectivity, an advertiser is a device which advertises itself and
 
 When a host starts the network, it starts to advertise itself so that nearby browsers can find it. When a browser finds a nearby host (an advertiser), it sends a connection request to the host. If the host approves the connection request, the sender of the connection request will be connected to the network as a client. When a client successfully connects to the network, it should stop browsing.
 
-## How to Use The Transport
-
-We created a [sample project](https://github.com/holoi/UnityNetcodeMPCTransportSample) demonstrating how to properly setup the network connection.
-
-### Transport Configurations
+## Transport Configurations
 
 Before start as either host or client, you can set the properties of the transport to adjust its behaviour to meet your needs. Under the default configuration, nearby host and clients will automatically connected.
 
@@ -38,7 +36,7 @@ Property `SessionId` is a string to make your Multipeer Connectivity session uni
 
 Property `Nickname` is the name of your device shown in the discovery phase.
 
-#### Host Configurations
+### Host Configurations
 
 When property `AutoAdvertise` is set to true, the device will automatically advertise right after starting as host. Otherwise, you will need to start advertising manually.
 
@@ -72,7 +70,7 @@ private void OnAdvertiserReceivedConnectionRequest(int connectionRequestKey, str
 }
 ```
 
-#### Client Configurations
+### Client Configurations
 
 When property `AutoBrowse` is set to true, the device will automatically browse nearby hosts right after starting as client. Otherwise, you will need to start browsing manually.
 
@@ -101,10 +99,10 @@ private void OnBrowserFoundPeer(int nearbyHostKey, string nearbyHostName)
 }
 ```
 
-### iOS Permissions
+## iOS Permissions
 
 When you build the project onto your iOS devices for the first time, both host and client devices will trigger the Local Network Permission. You must allow this permission to let your devices connect. Furthermore, the browser device will trigger another Wireless Data Permission. You need to also allow this permission as well.
 
-### Debug Your Project in Unity Editor
+## Debug Your Project in Unity Editor
 
 Please notice that Multipeer Connectivity Transport can only run on an iOS device. It cannot run on your Mac. Therefore, when you want to debug your project in Unity Editor, we recommand you temporarily switch to use Unity Transport.
