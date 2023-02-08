@@ -423,6 +423,9 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Start advertising.
+        /// </summary>
         public void StartAdvertising()
         {
             if (IsRuntime && !_isAdvertising)
@@ -433,6 +436,9 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Stop advertising.
+        /// </summary>
         public void StopAdvertising()
         {
             if (IsRuntime && _isAdvertising)
@@ -443,6 +449,9 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Start browsing.
+        /// </summary>
         public void StartBrowsing()
         {
             if (IsRuntime && !_isBrowsing)
@@ -453,6 +462,9 @@ namespace Netcode.Transports.MultipeerConnectivity
             }
         }
 
+        /// <summary>
+        /// Stop browsing.
+        /// </summary>
         public void StopBrowsing()
         {
             if (IsRuntime && _isBrowsing)
