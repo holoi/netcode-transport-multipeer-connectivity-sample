@@ -1,11 +1,13 @@
 {
   "dependencies": {
-    "com.community.netcode.transport.multipeer-connectivity": {
-      "version": "https://github.com/holoi/netcode-transport-multipeerconnectivity.git",
+    "com.holoi.netcode.transport.multipeer-connectivity": {
+      "version": "1.0.2",
       "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "e815086c674bc82c417f31c244939dac3d7fb81e"
+      "source": "registry",
+      "dependencies": {
+        "com.unity.netcode.gameobjects": "1.7.1"
+      },
+      "url": "https://registry.npmjs.com"
     },
     "com.unity.ai.navigation": {
       "version": "2.0.0",
@@ -17,7 +19,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.9",
+      "version": "1.8.10",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -108,8 +110,8 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.netcode.gameobjects": {
-      "version": "1.7.0",
-      "depth": 0,
+      "version": "1.7.1",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.nuget.mono-cecil": "1.10.1",

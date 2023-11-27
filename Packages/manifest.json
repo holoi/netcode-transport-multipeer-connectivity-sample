@@ -1,6 +1,13 @@
 {
+  "scopedRegistries": [{
+    "name": "Holo Intearctive",
+    "url": "https://registry.npmjs.com",
+    "scopes": [
+      "com.holoi"
+    ]
+  }],
   "dependencies": {
-    "com.community.netcode.transport.multipeer-connectivity": "https://github.com/holoi/netcode-transport-multipeerconnectivity.git",
+    "com.holoi.netcode.transport.multipeer-connectivity": "1.0.2",
     "com.unity.ai.navigation": "2.0.0",
     "com.unity.collab-proxy": "2.2.0",
     "com.unity.feature.development": "1.0.2",
