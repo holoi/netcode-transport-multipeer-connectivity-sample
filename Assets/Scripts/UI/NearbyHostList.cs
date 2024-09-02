@@ -1,7 +1,6 @@
-// SPDX-FileCopyrightText: Copyright 2023 Holo Interactive <dev@holoi.com>
-//
-// SPDX-FileContributor: Yuchen Zhang <yuchen@holoi.com>
-//
+// SPDX-FileCopyrightText: Copyright 2024 Reality Design Lab <dev@reality.design>
+// SPDX-FileContributor: Yuchen Zhang <yuchenz27@outlook.com>
+// SPDX-FileContributor: Botao Amber Hu <botao@reality.design>
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Generic;
@@ -64,8 +63,7 @@ public class NearbyHostList : MonoBehaviour
 
             var nearbyHostSlotInstance = Instantiate(_nearbyHostSlotPrefab);
             nearbyHostSlotInstance.Init(nearbyHostKey, hostName);
-            nearbyHostSlotInstance.transform.localScale = Vector3.one;
-            nearbyHostSlotInstance.transform.SetParent(_root);
+            nearbyHostSlotInstance.transform.SetParent(_root, false);
 
             _nearbyHostSlotList.Add(nearbyHostSlotInstance);
         }

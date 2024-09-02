@@ -1,7 +1,6 @@
-// SPDX-FileCopyrightText: Copyright 2023 Holo Interactive <dev@holoi.com>
-//
-// SPDX-FileContributor: Yuchen Zhang <yuchen@holoi.com>
-//
+// SPDX-FileCopyrightText: Copyright 2024 Reality Design Lab <dev@reality.design>
+// SPDX-FileContributor: Yuchen Zhang <yuchenz27@outlook.com>
+// SPDX-FileContributor: Botao Amber Hu <botao@reality.design>
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Generic;
@@ -25,6 +24,7 @@ public class ConnectedPlayerList : MonoBehaviour
 
         Player.OnPlayerSpawned += OnPlayerSpawned;
         Player.OnPlayerDespawned += OnPlayerDespawned;
+        Player.OnPlayerNicknameChanged += OnPlayerNicknameChanged;
         UpdateConnectedPlayerList();
     }
 
@@ -32,6 +32,7 @@ public class ConnectedPlayerList : MonoBehaviour
     {
         Player.OnPlayerSpawned -= OnPlayerSpawned;
         Player.OnPlayerDespawned -= OnPlayerDespawned;
+        Player.OnPlayerNicknameChanged -= OnPlayerNicknameChanged;
     }
 
     private void OnPlayerSpawned(Player _)
@@ -44,6 +45,11 @@ public class ConnectedPlayerList : MonoBehaviour
         UpdateConnectedPlayerList();
     }
 
+    private void OnPlayerNicknameChanged(Player _) 
+    {
+        UpdateConnectedPlayerList();
+    }
+    
     private void UpdateConnectedPlayerList()
     {
         // We destroy and instantiate every connection request slot in every frame.
@@ -68,8 +74,7 @@ public class ConnectedPlayerList : MonoBehaviour
             }
             playerSlotInstance.GetComponentInChildren<TMP_Text>().text = nickname;
             // Attach the slot instance to the list root
-            playerSlotInstance.transform.localScale = Vector3.one;
-            playerSlotInstance.transform.SetParent(_root);
+            playerSlotInstance.transform.SetParent(_root, false);
 
             _playerSlotList.Add(playerSlotInstance);
         }
