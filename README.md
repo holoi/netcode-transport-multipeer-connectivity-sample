@@ -24,8 +24,11 @@ Note: The later versions may work but are not tested.
 ### Client
 <img width="298" alt="image" src="https://github.com/user-attachments/assets/be10e638-6205-4093-a883-51ef3823f79c">
 
-### Cross-Platform Communication Between iPhone App and Unity Editor
+### Cross-Platform Communication Between iOS App and Unity Editor (macOS)
 <img width="520" alt="image" src="https://github.com/user-attachments/assets/bcfffea7-77ca-432f-9ecd-d628b0800f37">
+
+### Cross-Platform Communication Between iOS App, visionOS app and Unity Editor (macOS)
+<img width="1469" alt="image" src="https://github.com/user-attachments/assets/971d8413-e4ec-4fd5-bdd0-3f93ea97406e">
 
 
 ## Author and License 
