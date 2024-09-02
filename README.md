@@ -15,16 +15,16 @@ This sample project has been tested and verified for peer-to-peer communication 
 Note: The later versions may work but are not tested.
 
 ## Screenshot
-Initial Screen
-<img width="308" alt="image" src="https://github.com/user-attachments/assets/6897d2aa-a2ce-42c0-a367-c30887186f1d">
+### Initial Screen
+<img width="318" alt="image" src="https://github.com/user-attachments/assets/9a84a7f7-b3ee-4be3-b64e-fd89d254b743">
 
-Host
-<img width="300" alt="image" src="https://github.com/user-attachments/assets/f32fd8ab-ea03-441a-9c83-92542ddaca24">
+### Host
+<img width="313" alt="image" src="https://github.com/user-attachments/assets/fb4aad22-2997-412b-8bc3-0503be899826">
 
-Client
-<img width="475" alt="image" src="https://github.com/user-attachments/assets/db87e894-f060-4e58-849c-044974b5191a">
+### Client
+<img width="298" alt="image" src="https://github.com/user-attachments/assets/be10e638-6205-4093-a883-51ef3823f79c">
 
-Cross-Platform Communication Between iPhone App and Unity Editor
+### Cross-Platform Communication Between iPhone App and Unity Editor
 <img width="520" alt="image" src="https://github.com/user-attachments/assets/bcfffea7-77ca-432f-9ecd-d628b0800f37">
 
 
