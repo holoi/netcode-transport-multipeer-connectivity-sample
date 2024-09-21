@@ -7,10 +7,10 @@ Multipeer Connectivity is a powerful framework provided by Apple that enables se
 ## System Requirements
 
 This sample project has been tested and verified for peer-to-peer communication using MultipeerConnectivity across the following platforms:
-- iOS 17.0+
-- visionOS 1.0+
-- macOS 14.0+
-- Unity Editor 2022.3 LTS (macOS)
+- iOS 18.0
+- visionOS 2.0
+- macOS 15.0
+- Unity Editor 6 (macOS)
 
 Note: The later versions may work but are not tested.
 
