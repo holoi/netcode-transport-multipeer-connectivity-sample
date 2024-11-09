@@ -1,20 +1,20 @@
 {
   "scopedRegistries": [
     {
-      "name": "Reality Design Lab",
-      "url": "https://registry.npmjs.com",
+      "name": "openupm",
+      "url": "https://package.openupm.com",
       "scopes": [
         "org.realitydeslab"
       ]
     }
   ],
   "dependencies": {
-    "com.unity.multiplayer.tools": "2.1.0",
-    "com.unity.netcode.gameobjects": "1.11.0",
+    "com.unity.multiplayer.tools": "2.2.1",
+    "com.unity.netcode.gameobjects": "2.0.0",
     "com.unity.test-framework": "1.4.5",
     "com.unity.timeline": "1.8.7",
     "com.unity.ugui": "2.0.0",
-    "org.realitydeslab.netcode.transport.multipeer-connectivity": "file:../../netcode-transport-multipeer-connectivity",
+    "org.realitydeslab.netcode.transport.multipeer-connectivity": "1.2.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
